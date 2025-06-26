@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Temples - Temple Booking System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="section-title">
+        <h2>Sacred Temples</h2>
+        <p class="text-muted">Discover divine destinations for your spiritual journey</p>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="GET" class="d-flex">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search temples..." value="{{ search_query }}">
+                <select name="location" class="form-select me-2">
+                    <option value="">All Locations</option>
+                    {% for location in locations %}
+                        <option value="{{ location }}" {% if location_filter == location %}selected{% endif %}>{{ location }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Temples Grid -->
+    <div class="row">
+        {% for temple in temples %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    {% if temple.image %}
+                        <img src="{{ temple.image.url }}" class="card-img-top" alt="{{ temple.name }}">
+                    {% else %}
+                        <img src="https://images.pexels.com/photos/2166711/pexels-photo-2166711.jpeg" class="card-img-top" alt="{{ temple.name }}">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ temple.name }}</h5>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ temple.location }}
+                        </p>
+                        <p class="card-text flex-grow-1">{{ temple.description|truncatewords:15 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary">₹{{ temple.darshan_price }}</span>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>{{ temple.opening_time }} - {{ temple.closing_time }}
+                            </small>
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'temple_detail' temple.id %}" class="btn btn-primary w-100">
+                                <i class="fas fa-eye me-2"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <div class="py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No temples found</h4>
+                    <p class="text-muted">Try adjusting your search criteria</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if temples.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if temples.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ temples.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for num in temples.paginator.page_range %}
+                    {% if temples.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if temples.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ temples.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

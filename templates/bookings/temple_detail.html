@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ temple.name }} - Temple Booking System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Temple Image -->
+            <div class="card mb-4">
+                {% if temple.image %}
+                    <img src="{{ temple.image.url }}" class="card-img-top" alt="{{ temple.name }}" style="height: 400px; object-fit: cover;">
+                {% else %}
+                    <img src="https://images.pexels.com/photos/2166711/pexels-photo-2166711.jpeg" class="card-img-top" alt="{{ temple.name }}" style="height: 400px; object-fit: cover;">
+                {% endif %}
+            </div>
+
+            <!-- Temple Description -->
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ temple.name }}</h2>
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ temple.location }}
+                    </p>
+                    <p class="card-text">{{ temple.description }}</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-clock me-2"></i>Timings</h6>
+                            <p>{{ temple.opening_time }} - {{ temple.closing_time }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-rupee-sign me-2"></i>Darshan Price</h6>
+                            <p class="price-tag d-inline-block">₹{{ temple.darshan_price }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Booking Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Book Darshan</h5>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'book_darshan' temple.id %}" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-ticket-alt me-2"></i>Book Darshan Now
+                        </a>
+                    {% else %}
+                        <p class="text-muted mb-3">Please login to book darshan</p>
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Book
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Darshan Slots -->
+            {% if darshan_slots %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Available Slots</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for slot in darshan_slots %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                <div>
+                                    <strong>{{ slot.get_slot_type_display }}</strong><br>
+                                    <small class="text-muted">{{ slot.start_time }} - {{ slot.end_time }}</small>
+                                </div>
+                                <span class="badge bg-success">₹{{ slot.price }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Available Rooms -->
+            {% if rooms %}
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-bed me-2"></i>Available Rooms</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for room in rooms %}
+                            <div class="border rounded p-3 mb-3">
+                                <h6>{{ room.get_room_type_display }}</h6>
+                                <p class="text-muted small mb-2">Room {{ room.room_number }} • Capacity: {{ room.capacity }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-primary">₹{{ room.price_per_night }}/night</span>
+                                    <a href="{% url 'room_detail' room.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <a href="{% url 'room_list' %}?temple={{ temple.id }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-plus me-2"></i>View All Rooms
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
